@@ -46,7 +46,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+#define DWT_CTRL    (*(volatile uint32_t*)0xE0001000)
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -56,6 +56,8 @@ static void MX_GPIO_Init(void);
 	static void ledgreen_handler(void *parameters);
 	static void ledorange_handler(void *parameters);
 	static void ledred_handler(void *parameters);
+
+
 
 /* USER CODE END PFP */
 
@@ -84,7 +86,7 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+   HAL_Init();
 
   /* USER CODE BEGIN Init */
 
@@ -100,21 +102,24 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
+  //CYCLCNT enable
+  DWT_CTRL |= ( 1 << 0);
 
+  SEGGER_SYSVIEW_Conf();
 
-  status = xTaskCreate(ledgreen_handler, "LED_Green_Task", 200, NULL, 2, &task1_handle);
-
-  configASSERT(status == pdPASS);
-
-  status = xTaskCreate(ledorange_handler, "LED_Orange_Task", 200, NULL, 2, &task2_handle);
-
-  configASSERT(status == pdPASS);
-
-  status = xTaskCreate(ledred_handler, "LED_Red_Task", 200, NULL, 2, &task3_handle);
+  status = xTaskCreate(ledgreen_handler, "LED_green_task", 200, NULL, 2, &task1_handle);
 
   configASSERT(status == pdPASS);
 
-  // start the freeRTOS schedular
+  status = xTaskCreate(ledred_handler, "LED_red_task", 200,NULL, 2, &task2_handle);
+
+  configASSERT(status == pdPASS);
+
+  status = xTaskCreate(ledorange_handler, "LED_orange_task", 200, NULL, 2, &task3_handle);
+
+  configASSERT(status == pdPASS);
+
+  //start the freeRTOS scheduler
   vTaskStartScheduler();
 
   /* USER CODE END 2 */
